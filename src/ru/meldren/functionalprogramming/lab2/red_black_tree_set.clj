@@ -1,4 +1,4 @@
-(ns ru.meldren.functionalprogramming.lab1.red-black-tree
+(ns ru.meldren.functionalprogramming.lab2.red-black-tree-set
   (:require [clojure.core.match :refer [match]])
   (:import [clojure.lang IPersistentSet]))
 
@@ -106,7 +106,8 @@
   (filter-values [this pred])
   (map-values [this f])
   (fold-left-values [this init f])
-  (fold-right-values [this init f]))
+  (fold-right-values [this init f])
+  (combine [this other]))
 
 (deftype RedBlackTreeSet [tree]
   IRedBlackTreeSet
@@ -116,7 +117,9 @@
   (map-values [_ f] (RedBlackTreeSet. (map-tree tree f)))
   (fold-left-values [_ init f] (fold-left-tree tree init f))
   (fold-right-values [_ init f] (fold-right-tree tree init f))
+  (combine [_ other] (reduce #(insert %1 %2) (RedBlackTreeSet. tree) (seq other)))
   IPersistentSet
+  (equiv [_ other] (= (set (seq (RedBlackTreeSet. tree))) (set (seq other))))
   (empty [_] (RedBlackTreeSet. nil))
   (seq [_] (when tree (map (fn [[_ _ val _]] val) (tree-seq sequential? (fn [[_ left _ right]] (remove nil? [left right])) tree))))
   (get [_ x] (find-val tree x))
@@ -124,18 +127,3 @@
 
 (defn rb-set [& args]
   (reduce #(insert %1 %2) (RedBlackTreeSet. nil) args))
-
-;; TEST SECTION
-
-(def test-set (rb-set 3 5 6 8 9))
-(println (empty RedBlackTreeSet))
-(println test-set)
-(println (insert test-set 7))
-(println (delete test-set 6))
-(println (contains? test-set 9))
-(println (contains? test-set 91))
-(println (seq test-set))
-(println (map-values test-set even?))
-(println (filter-values test-set even?))
-(println (fold-left-values test-set 0 -))
-(println (fold-right-values test-set 0 -))
