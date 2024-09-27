@@ -20,8 +20,7 @@
                                      (< x y) (balance [color (ins a) y b])
                                      (> x y) (balance [color a y (ins b)])
                                      :else tree)))]
-    (let [[_ a y b] (ins tree)]
-      [:black a y b])))
+    (balance (ins tree))))
 
 (defn- find-val [tree x]
   (match tree
@@ -36,13 +35,13 @@
          nil nil
          [:black nil y _] y
          [:red nil y _] y
-         [color a _ _] (find-min a)))
+         [_ a _ _] (find-min a)))
 
 (defn- remove-min [tree]
   (match tree
          nil nil
-         [:red nil y b] b
-         [:black nil y b] b
+         [:red nil _ b] b
+         [:black nil _ b] b
          [color a y b] (let [new-a (remove-min a)]
                          (balance [color new-a y b]))))
 
