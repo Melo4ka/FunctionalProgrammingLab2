@@ -1,6 +1,5 @@
 (ns ru.meldren.functionalprogramming.lab2.red-black-tree-set-prop-test
   (:require [clojure.test :refer :all]
-            [clojure.test.check :as check]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
             [clojure.test.check.clojure-test :refer [defspec]]

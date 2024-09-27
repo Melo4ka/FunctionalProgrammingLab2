@@ -104,24 +104,25 @@
 
 ```clojure
 (def gen-set
-  (gen/fmap rb-set (gen/list gen/small-integer)))
+  (gen/fmap #(apply rb-set %)
+            (gen/vector gen/small-integer)))
 
-(deftest test-monoid-identity
-         (check/quick-check 100
-                            (prop/for-all [set gen-set]
-                                          (and (= set (combine set (rb-set)))
-                                               (= set (combine (rb-set) set))))))
+(defspec test-monoid-identity
+         100
+         (prop/for-all [set gen-set]
+                       (and (= set (combine set (rb-set)))
+                            (= set (combine (rb-set) set)))))
 
-(deftest test-monoid-associativity
-         (check/quick-check 100
-                            (prop/for-all [set1 gen-set set2 gen-set set3 gen-set]
-                                          (= (combine set1 (combine set2 set3))
-                                             (combine (combine set1 set2) set3)))))
+(defspec test-monoid-associativity
+         100
+         (prop/for-all [set1 gen-set set2 gen-set set3 gen-set]
+                       (= (combine set1 (combine set2 set3))
+                          (combine (combine set1 set2) set3))))
 
-(deftest prop-test-idempotence
-         (check/quick-check 100
-                            (prop/for-all [set gen-set]
-                                          (= (combine set set) set))))
+(defspec prop-test-idempotence
+         100
+         (prop/for-all [set gen-set]
+                       (= (combine set set) set)))
 ```
 
 ## Заключение
