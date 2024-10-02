@@ -13,22 +13,27 @@
          :else tree))
 
 (defn- insert-val-tree [tree x]
-  (let [ins (fn ins [tree]
-              (match tree
-                     nil [:red nil x nil]
-                     [color a y b] (cond
-                                     (< x y) (balance [color (ins a) y b])
-                                     (> x y) (balance [color a y (ins b)])
-                                     :else tree)))]
-    (balance (ins tree))))
+  (let [insert (fn insert [tree]
+                 (match tree
+                        nil [:red nil x nil]
+                        [color a y b]
+                        (let [cmp (compare x y)]
+                          (cond
+                            (< cmp 0) (balance [color (insert a) y b])
+                            (> cmp 0) (balance [color a y (insert b)])
+                            :else tree))))
+        [_ a y b] (insert tree)]
+    [:black a y b]))
 
 (defn- find-val [tree x]
   (match tree
          nil nil
-         [_ a y b] (cond
-                     (< x y) (find-val a x)
-                     (> x y) (find-val b x)
-                     :else x)))
+         [_ a y b]
+         (let [cmp (compare x y)]
+           (cond
+             (< cmp 0) (find-val a x)
+             (> cmp 0) (find-val b x)
+             :else x))))
 
 (defn- find-min [tree]
   (match tree
@@ -48,16 +53,18 @@
 (defn- remove-val-tree [tree x]
   (match tree
          nil nil
-         [color a y b] (cond
-                         (< x y) (let [new-a (remove-val-tree a x)]
-                                   (balance [color new-a y b]))
-                         (> x y) (let [new-b (remove-val-tree b x)]
-                                   (balance [color a y new-b]))
-                         :else (let [new-b (remove-min b)]
-                                 (if new-b
-                                   (let [min-val (find-min b)]
-                                     (balance [color a min-val (remove-min b)]))
-                                   a)))))
+         [color a y b]
+         (let [cmp (compare x y)]
+           (cond
+             (< cmp 0) (let [new-a (remove-val-tree a x)]
+                         (balance [color new-a y b]))
+             (> cmp 0) (let [new-b (remove-val-tree b x)]
+                         (balance [color a y new-b]))
+             :else (let [new-b (remove-min b)]
+                     (if new-b
+                       (let [min-val (find-min b)]
+                         (balance [color a min-val (remove-min b)]))
+                       a))))))
 
 (defn- filter-tree [tree pred]
   (when tree
@@ -96,7 +103,7 @@
 (defn- fold-right-tree [tree init f]
   (if tree
     (let [[_ a x b] tree]
-      (fold-right-tree a (f x (fold-right-tree b init f)) f))
+      (fold-right-tree b (f x (fold-right-tree a init f)) f))
     init))
 
 (defprotocol IRedBlackTreeSet
